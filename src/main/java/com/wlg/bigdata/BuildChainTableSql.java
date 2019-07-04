@@ -6,7 +6,7 @@ import com.wlg.bigdata.constant.SysConstants;
 /**
  * 构建拉链表sql
  */
-public class BuildChainTableSql {
+public class BuildChainTableSql extends BuildSql{
 
     /**
      * 根据主键获取表中唯一值
@@ -74,4 +74,10 @@ public class BuildChainTableSql {
         return buildGetUniqueDataSql(key,rowNumSort,tableName,tableFields,partitionVal,hourPartition);
     }
 
+
+
+    //构建拉链表sql
+    public String buildSql() {
+        return null;
+    }
 }
