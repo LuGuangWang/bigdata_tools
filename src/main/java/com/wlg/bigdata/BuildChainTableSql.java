@@ -2,11 +2,39 @@ package com.wlg.bigdata;
 
 import com.wlg.bigdata.constant.Constants;
 import com.wlg.bigdata.constant.SysConstants;
+import com.wlg.bigdata.util.BaseUtil;
 
 /**
  * 构建拉链表sql
  */
 public class BuildChainTableSql extends BuildSql{
+
+    private final String table_prefix = "${table_name}";
+    //存放历史全量数据
+    private final String old_table = "tmp_${table_name}_old";
+    //存放最新全量数据
+    private final String new_table = "tmp_${table_name}_new";
+
+
+
+    //拼接最新全量数据sql
+    public String buildNewTableSql(String key,
+                                    String rowNumSort,
+                                    String tableName,
+                                    String tableFields,
+                                    boolean hourPartition){
+        StringBuilder sql = BaseUtil.getSelect();
+        //获取row_num
+        String row_num_sql = buildGetUniqueDataSql(key,rowNumSort,tableName,tableFields,hourPartition);
+        //临时表名
+        String tmpName = Constants.CL + row_num_sql + Constants.CR + "tmp";
+        BaseUtil.appendFieldsAndTable(tableFields,tmpName, sql);
+        //where 关键字
+        sql.append(Constants.empty).append(Constants.where);
+        //row_num=1
+        sql.append(Constants.empty).append(Constants.row_num_eq_1);
+        return sql.toString();
+    }
 
     /**
      * 根据主键获取表中唯一值
@@ -25,17 +53,13 @@ public class BuildChainTableSql extends BuildSql{
                                         String partitionVal,
                                         boolean hourPartition) {
         //select关键字
-        StringBuilder sql = new StringBuilder(Constants.select);
+        StringBuilder sql = BaseUtil.getSelect();
         //row_num
         String row_num_sql = Constants.row_num.replace(Constants.key_prefix, key)
                 .replace(Constants.row_sort_prefix, rowNumSort);
         sql.append(Constants.empty).append(row_num_sql);
-        //要拉取的字段
-        sql.append(Constants.empty).append(tableFields.trim());
-        //from关键字
-        sql.append(Constants.empty).append(Constants.from);
-        //表名
-        sql.append(Constants.empty).append(tableName);
+        //字段 & 表名
+        BaseUtil.appendFieldsAndTable(tableFields,tableName, sql);
         //where 关键字
         sql.append(Constants.empty).append(Constants.where);
         //分区
@@ -62,7 +86,7 @@ public class BuildChainTableSql extends BuildSql{
      * @param hourPartition 分区类型，true 为小时分区
      * @return
      */
-    public String buildGetUniqueDataSql(String key,
+    private String buildGetUniqueDataSql(String key,
                                         String rowNumSort,
                                         String tableName,
                                         String tableFields,
@@ -74,10 +98,4 @@ public class BuildChainTableSql extends BuildSql{
         return buildGetUniqueDataSql(key,rowNumSort,tableName,tableFields,partitionVal,hourPartition);
     }
 
-
-
-    //构建拉链表sql
-    public String buildSql() {
-        return null;
-    }
 }

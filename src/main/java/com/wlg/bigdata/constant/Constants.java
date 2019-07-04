@@ -3,6 +3,8 @@ package com.wlg.bigdata.constant;
 //常量
 public abstract class Constants {
     public static final String empty = " ";
+    public static final String CL = " ( ";
+    public static final String CR = " ) ";
 
     public static final String select = "select";
     public static final String from ="from";
@@ -13,7 +15,8 @@ public abstract class Constants {
     public static final String key_prefix = "${key}";
     public static final String row_sort_prefix = "${sortkey}";
     public static final String partition_prefix = "${partition}";
-
+    //row_num_eq_1 & row_num是一对
+    public static final String row_num_eq_1 = "row_num = 1";
     public static final String row_num = "row_number() over(distribute by ${key} sort by ${sortkey} desc) row_num,";
     //主键不能为空
     public static final String key_not_null = "${key} is not null";
