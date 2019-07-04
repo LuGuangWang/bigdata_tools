@@ -5,11 +5,15 @@ public abstract class Constants {
     public static final String empty = " ";
     public static final String CL = " ( ";
     public static final String CR = " ) ";
+    public static final String seg = ";\n";
 
-    public static final String select = "select";
-    public static final String from ="from";
-    public static final String where = "where";
+    public static final String select = "select ";
+    public static final String from =" from ";
+    public static final String where = " where ";
     public static final String and = " and ";
+    public static final String drop_table = "drop table if exists ";
+    public static final String create_table = "create table ";
+    public static final String as = " as ";
 
 
     public static final String key_prefix = "${key}";

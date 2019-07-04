@@ -15,10 +15,28 @@ public class BuildChainTableSql extends BuildSql{
     //存放最新全量数据
     private final String new_table = "tmp_${table_name}_new";
 
+    //存储最新的全量数据
+    public String buildSaveNewTableSql(String key,
+                                       String rowNumSort,
+                                       String tableName,
+                                       String tableFields,
+                                       boolean hourPartition){
+        StringBuilder sql = new StringBuilder();
+        //临时表名
+        String newTableName = new_table.replace(table_prefix,tableName.replace(".","_"));
+        //先清理临时表数据
+        sql.append(Constants.drop_table).append(newTableName).append(Constants.seg);
+        //创建新表
+        sql.append(Constants.create_table).append(newTableName).append(Constants.as);
+        //新表sql
+        String new_table_sql = buildNewTableSql(key,rowNumSort,tableName,tableFields,hourPartition);
+        sql.append(new_table_sql).append(Constants.seg);
+        return sql.toString();
+    }
 
 
     //拼接最新全量数据sql
-    public String buildNewTableSql(String key,
+    private String buildNewTableSql(String key,
                                     String rowNumSort,
                                     String tableName,
                                     String tableFields,
