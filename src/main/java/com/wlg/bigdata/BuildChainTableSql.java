@@ -15,6 +15,14 @@ public class BuildChainTableSql extends BuildSql{
     //存放最新全量数据
     private final String new_table = "tmp_${table_name}_new";
 
+    private static BuildChainTableSql ins = new BuildChainTableSql();
+
+    private BuildChainTableSql(){}
+
+    public static BuildChainTableSql getIns(){
+        return ins;
+    }
+
     //存储最新的全量数据
     public String buildSaveNewTableSql(String key,
                                        String rowNumSort,
