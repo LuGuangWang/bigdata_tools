@@ -18,5 +18,11 @@ public abstract class SysConstants {
     public static final String END_MONTH = "${END_MONTH}";
     //拉链表截止日期 日
     public static final String END_DAY = "${END_DAY}";
+    //业务日期前一天对应的年
+    public static final String BIZYEAR_LD = "${BIZYEAR_LD}";
+    //业务日期前一天对应的月
+    public static final String BIZMONTH_LD = "${BIZMONTH_LD}";
+    //业务日期前一天对应的日
+    public static final String BIZDAY_LD = "${BIZDAY_LD}";
 
 }

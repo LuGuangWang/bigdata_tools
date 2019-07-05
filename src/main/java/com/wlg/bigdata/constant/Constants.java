@@ -9,12 +9,14 @@ public abstract class Constants {
     public static final String dot = ",";
     public static final String dot1 = ".";
     public static final String eq = " = ";
+    public static final String not_eq = " != ";
     public static final String dot2 = "'";
 
     public static final String select = "select ";
     public static final String from =" from ";
     public static final String where = " where ";
     public static final String and = " and ";
+    public static final String or = " or ";
     public static final String drop_table = "drop table if exists ";
     public static final String create_table = "create table ";
     public static final String as = " as ";
