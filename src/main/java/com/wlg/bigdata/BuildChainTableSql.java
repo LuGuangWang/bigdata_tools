@@ -4,6 +4,9 @@ import com.wlg.bigdata.constant.Constants;
 import com.wlg.bigdata.constant.SysConstants;
 import com.wlg.bigdata.util.BaseUtil;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * 构建拉链表sql
  */
@@ -11,9 +14,9 @@ public class BuildChainTableSql extends BuildSql {
 
     private final String table_prefix = "${table_name}";
     //存放历史全量数据
-    private final String old_table = "tmp_${table_name}_old";
+    private final String old_table_rule = "tmp_${table_name}_old";
     //存放最新全量数据
-    private final String new_table = "tmp_${table_name}_new";
+    private final String new_table_rule = "tmp_${table_name}_new";
 
     private static BuildChainTableSql ins = new BuildChainTableSql();
 
@@ -37,6 +40,28 @@ public class BuildChainTableSql extends BuildSql {
         //存储昨日全量数据
         String oldSaveSql = buildSaveOldTableSql(tableFields,targetTableName);
         sql.append(oldSaveSql);
+        //存储最新全量数据到目标表
+
+
+
+
+        return sql.toString();
+    }
+
+    //整理最新全量数据sql
+    private String buildNewDataSql(String key,
+                                   String rowNumSort,
+                                   String tableName,
+                                   String tableFields,
+                                   boolean hourPartition,
+                                   String targetTableName){
+        StringBuilder sql = new StringBuilder();
+        //昨日全量数据临时表
+        String oldDataTable = getTmpTableName(targetTableName, old_table_rule);
+        //今日最新全量数据临时表
+        String newDataTable = getTmpTableName(tableName, new_table_rule);
+
+        Set<String> fields = new HashSet<>();
 
 
         return sql.toString();
@@ -46,8 +71,7 @@ public class BuildChainTableSql extends BuildSql {
     private String buildSaveOldTableSql(String tableFields,
                                         String targetTableName){
         StringBuilder sql = new StringBuilder();
-        //临时表名
-        String tmpTableName = old_table.replace(table_prefix, targetTableName.replace(".", "_"));
+        String tmpTableName = getTmpTableName(targetTableName, old_table_rule);
         //先清理临时表数据
         sql.append(Constants.drop_table).append(tmpTableName).append(Constants.seg);
         //创建新表
@@ -57,6 +81,11 @@ public class BuildChainTableSql extends BuildSql {
         sql.append(old_sql).append(Constants.seg);
 
         return sql.toString();
+    }
+
+    private String getTmpTableName(String tableName, String tableNameRule) {
+        //临时表名
+        return tableNameRule.replace(table_prefix, tableName.replace(".", "_"));
     }
 
     //获取昨日全量数据
@@ -73,7 +102,7 @@ public class BuildChainTableSql extends BuildSql {
                                         boolean hourPartition) {
         StringBuilder sql = new StringBuilder();
         //临时表名
-        String newTableName = new_table.replace(table_prefix, tableName.replace(".", "_"));
+        String newTableName = getTmpTableName(tableName, new_table_rule);
         //先清理临时表数据
         sql.append(Constants.drop_table).append(newTableName).append(Constants.seg);
         //创建新表
