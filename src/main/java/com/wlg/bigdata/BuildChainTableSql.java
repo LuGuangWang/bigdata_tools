@@ -42,29 +42,86 @@ public class BuildChainTableSql extends BuildSql {
         sql.append(oldSaveSql);
         //存储最新全量数据到目标表
 
+        String saveDataSql = buildSaveNewData(key,tableName,tableFields,targetTableName);
+        sql.append(saveDataSql);
 
 
+        return sql.toString();
+    }
+
+    private String buildSaveNewData(String key,
+                                    String tableName,
+                                    String tableFields,
+                                    String targetTableName){
+        StringBuilder sql = new StringBuilder();
+        //表名
+        sql.append(Constants.insert_overwrite).append(targetTableName);
+        //分区
+        String partitionDt = Constants.partition_dt.replace(Constants.year_prefix,SysConstants.END_YEAR)
+                .replace(Constants.month_prefix,SysConstants.END_MONTH)
+                .replace(Constants.day_prefix,SysConstants.END_DAY);
+        sql.append(partitionDt);
+        //最新全量数据sql
+        String newDataSql = buildNewDataSql(key,tableName,tableFields,targetTableName);
+        sql.append(newDataSql);
+        sql.append(Constants.seg);
 
         return sql.toString();
     }
 
     //整理最新全量数据sql
     private String buildNewDataSql(String key,
-                                   String rowNumSort,
                                    String tableName,
                                    String tableFields,
-                                   boolean hourPartition,
                                    String targetTableName){
-        StringBuilder sql = new StringBuilder();
+        StringBuilder sql = BaseUtil.getSelect();
+
         //昨日全量数据临时表
         String oldDataTable = getTmpTableName(targetTableName, old_table_rule);
+        String oldAlias = " a ";
         //今日最新全量数据临时表
         String newDataTable = getTmpTableName(tableName, new_table_rule);
+        String newAlias = " b ";
+        //表字段
+        Set<String> fields = getTableFields(key,tableFields);
 
-        Set<String> fields = new HashSet<>();
+        //拉取字段
+        StringBuilder fstr = new StringBuilder();
+        fields.forEach(f->{
+            fstr.append(newAlias.trim()).append(Constants.dot1.trim()).append(f).append(Constants.dot);
+        });
+        sql.append(fstr.substring(0,fstr.length()-Constants.dot.length()));
+        //主表
+        sql.append(Constants.from).append(newDataTable).append(newAlias);
+        //关联表
+        sql.append(Constants.left_join).append(oldDataTable).append(oldAlias).append(Constants.on);
+        //主键关联条件
+        sql.append(newAlias.trim()).append(Constants.dot1).append(key).append(Constants.eq);
+        sql.append(oldAlias.trim()).append(Constants.dot1).append(key);
+        //其它字段关联条件
+        fields.forEach(f->{
+            String newTableField = newAlias.trim() + Constants.dot1 + f;
+            String oldTableField = oldAlias.trim() + Constants.dot1 + f;
 
+            String newField = Constants.nvl.replace(Constants.field_name_prefix,newTableField).replace(Constants.default_val_prefix,SysConstants.DEFAULT_VAL);
+            String oldField = Constants.nvl.replace(Constants.field_name_prefix,oldTableField).replace(Constants.default_val_prefix,SysConstants.DEFAULT_VAL);
 
+            sql.append(Constants.and);
+            sql.append(newField).append(Constants.eq).append(oldField);
+        });
         return sql.toString();
+    }
+
+    private Set<String> getTableFields(String key,String tableFields) {
+        Set<String> fields = new HashSet<>();
+        String[] field = tableFields.split(Constants.dot);
+        for(String f:field){
+            fields.add(f.trim());
+        }
+        //去除主键
+        fields.remove(key);
+
+        return fields;
     }
 
     //存储昨日全量数据
