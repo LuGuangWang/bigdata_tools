@@ -44,20 +44,17 @@ public class BuildUniqueDataSql extends BuildSql{
         BaseUtil.appendFieldsAndTable(tableFields,tableName, sql);
         //where 关键字
         sql.append(Constants.empty).append(Constants.where);
-        //分区
-        String pt_val;
-        if(hourPartition){//按小时分区
-            pt_val = Constants.p_ht.replace(Constants.partition_prefix,partitionVal);
-        }else{//按天分区
-            pt_val = Constants.p_dt.replace(Constants.partition_prefix,partitionVal);
-        }
+        //添加分区条件
+        String pt_val = BaseUtil.getPartitionWhere(partitionVal, hourPartition);
         sql.append(Constants.empty).append(pt_val);
-        //主键不为空
+        //添加主键不为空条件
         String key_sql = Constants.key_not_null.replace(Constants.key_prefix,key);
         sql.append(Constants.empty).append(Constants.and).append(key_sql);
 
         return sql.toString();
     }
+
+
 
     /**
      * 根据主键获取表中唯一值
